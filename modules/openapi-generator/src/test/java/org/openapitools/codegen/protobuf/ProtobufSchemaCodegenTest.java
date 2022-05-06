@@ -71,6 +71,32 @@ public class ProtobufSchemaCodegenTest {
         output.delete();
     }
 
+    @Test
+    public void testCodeGenWithWrapperTypes() throws IOException {
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("protobuf-schema")
+                .setInputSpec("src/test/resources/3_0/allOf_composition_discriminator.yaml")
+                //.setInputSpec("src/test/resources/3_0/petstore_oas3_test.yaml")
+                .setOutputDir(output.getAbsolutePath().replace("\\", "/"))
+                .addAdditionalProperty("useWrapperTypes", "true");
+
+        final ClientOptInput clientOptInput = configurator.toClientOptInput();
+        DefaultGenerator generator = new DefaultGenerator();
+        List<File> files = generator.opts(clientOptInput).generate();
+
+        TestUtils.ensureContainsFile(files, output, "models/pet.proto");
+        Path path = Paths.get(output + "/models/pet.proto");
+
+        assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/pet-with-wrapper-types.proto"));
+
+        output.delete();
+    }
+
     private void assertFileEquals(Path generatedFilePath, Path expectedFilePath) throws IOException {
         String generatedFile = new String(Files.readAllBytes(generatedFilePath), StandardCharsets.UTF_8)
             .replace("\n", "").replace("\r", "");

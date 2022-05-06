@@ -3,6 +3,10 @@ syntax = "proto3";
 
 package {{#lambda.lowercase}}{{{packageName}}};{{/lambda.lowercase}}
 
+{{#useWrapperTypes}}
+import "google/protobuf/wrappers.proto";
+{{/useWrapperTypes}}
+
 {{#imports}}
 {{#import}}
 import public "{{{modelPackage}}}/{{{import}}}.proto";
